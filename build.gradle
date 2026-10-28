@@ -7,6 +7,16 @@ version = project.mod_version
 group = project.maven_group
 base { archivesName = project.archives_base_name }
 
+loom {
+    splitEnvironmentSourceSets()
+    mods {
+        "phenomenon" {
+            sourceSet sourceSets.main
+            sourceSet sourceSets.client
+        }
+    }
+}
+
 repositories { mavenCentral() }
 
 dependencies {
