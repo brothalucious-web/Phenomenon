@@ -28,7 +28,7 @@ public final class PhenomenonClient implements ClientModInitializer {
     public void onInitializeClient() {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             AbstractClientPlayerEntity player = client.player;
-            if (player == null || client.world == null || !player.hasStatusEffect(StatusEffects.SPEED)) {
+            if (player == null || client.world == null || (!player.hasStatusEffect(StatusEffects.SPEED) || player.getStatusEffect(StatusEffects.SPEED).getAmplifier() != 1)) {
                 frames.clear();
                 lastPosition = null;
                 return;
