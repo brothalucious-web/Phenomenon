@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "id": "phenomenon",
+  "version": "${version}",
+  "name": "Phenomenon",
+  "description": "Random reality-breaking events: gravity anomalies, time distortions, Sandevistan trails, TNT trails, and more.",
+  "authors": ["brothalucious-web"],
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": { "main": ["com.phenomenon.PhenomenonMod"] },
+  "depends": { "fabricloader": ">=0.16.0", "minecraft": "~1.21.2", "java": ">=21", "fabric-api": "*" }
+}
