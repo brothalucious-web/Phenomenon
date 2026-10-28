@@ -68,7 +68,7 @@ public final class PhenomenonClient implements ClientModInitializer {
                     matrices.translate(x, y, z);
                     matrices.scale(scale, scale, scale);
                     client.getEntityRenderDispatcher().render(
-                            player, 0.0, 0.0, 0.0, player.getYaw(), 1.0F,
+                            player, 0.0, 0.0, 0.0, 1.0F,
                             matrices, consumers, 0x00F000F0
                     );
                 } finally {
