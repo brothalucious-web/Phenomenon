@@ -7,6 +7,7 @@
   "authors": ["brothalucious-web"],
   "license": "MIT",
   "environment": "*",
+  "mixins": ["phenomenon.mixins.json"],
   "entrypoints": { "main": ["com.phenomenon.PhenomenonMod"], "client": ["com.phenomenon.client.PhenomenonClient"] },
   "depends": { "fabricloader": ">=0.16.0", "minecraft": "~1.21.2", "java": ">=21", "fabric-api": "*" }
 }
