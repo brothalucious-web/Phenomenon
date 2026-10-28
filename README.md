@@ -8,7 +8,7 @@ A chaos mod where reality periodically breaks, with random automatic events and 
 
 - **Gravity inversion:** temporarily disables normal gravity and accelerates the player upward with portal particles. This is an inversion-style gameplay effect, not a global arbitrary-gravity rewrite.
 - **Time acceleration / dilation:** changes server tick rate to 45 TPS or 5 TPS for around eight seconds, then restores 20 TPS. This impacts the entire server.
-- **Sandevistan frames:** traces recent player positions with electric spark/end-rod particles. These are position trails rather than translucent duplicate player models.
+- **Sandevistan frames:** renders up to seven recent full-body copies of your player model at earlier positions, producing a layered speed-streak similar to the reference image. The copies currently use the player skin and standard rendering; custom translucent/tinted ghost shaders are not included yet.
 - **TNT trail:** spawns primed TNT while the player moves. Spawn rate is limited and nearby active TNT is capped.
 - **Other anomalies:** levitation, random short-range teleportation, and darkness.
 
