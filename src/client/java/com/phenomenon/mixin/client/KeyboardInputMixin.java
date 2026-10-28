@@ -14,7 +14,7 @@ public abstract class KeyboardInputMixin extends Input {
     @Inject(method = "tick", at = @At("TAIL"))
     private void phenomenon$invertMovement(CallbackInfo ci) {
         MinecraftClient client = MinecraftClient.getInstance();
-        if (client.player != null && client.player.hasStatusEffect(StatusEffects.SLOWNESS)) {
+        if (client.player != null && client.player.hasStatusEffect(StatusEffects.HASTE)) {
             var effect = client.player.getStatusEffect(StatusEffects.SLOWNESS);
             if (effect != null && effect.getAmplifier() == 10) {
                 this.movementForward = -this.movementForward;
