@@ -9,6 +9,9 @@ base { archivesName = project.archives_base_name }
 
 loom {
     splitEnvironmentSourceSets()
+    mixin {
+        defaultRefmapName = "phenomenon-refmap.json"
+    }
     mods {
         "phenomenon" {
             sourceSet sourceSets.main
