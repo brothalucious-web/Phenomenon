@@ -38,3 +38,7 @@ Commands require permission to use server commands. Test TNT in a disposable wor
 Requires JDK 21 and Gradle 8.10.2. Run `gradle build`; the output JAR is in `build/libs/`. GitHub Actions builds each push and uploads the mod JAR as an artifact when successful.
 
 The implementation has not yet been confirmed in a running Minecraft client. Run the project build and test in-game before treating any effect as verified.
+
+
+### Troubleshooting update
+The inverted-controls mixin targets Minecraft 1.21.2's `tick(boolean, float)` method and checks the same temporary Haste marker used by the anomaly. Use the latest successful GitHub Actions artifact, not an older JAR.
