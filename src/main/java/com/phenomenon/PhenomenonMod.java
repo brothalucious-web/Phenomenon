@@ -21,7 +21,7 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.UUID;
+import java.util.UUID;\nimport java.util.concurrent.TimeUnit;
 
 public final class PhenomenonMod implements ModInitializer {
     private static final int EVENT_MIN_TICKS = 600;
@@ -37,7 +37,7 @@ public final class PhenomenonMod implements ModInitializer {
     private static final Map<UUID, Deque<Vec3d>> movementFrames = new HashMap<>();
     private static final Map<UUID, Vec3d> lastPositions = new HashMap<>();
     private static int eventCooldown = EVENT_MIN_TICKS;
-    private static int tickRateRestoreTicks;
+    private static long tickRateRestoreAtNanos;
 
     @Override public void onInitialize() {
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) ->
@@ -53,14 +53,15 @@ public final class PhenomenonMod implements ModInitializer {
                 .then(CommandManager.literal("darkness").executes(ctx -> { var p=ctx.getSource().getPlayerOrThrow(); p.addStatusEffect(new StatusEffectInstance(StatusEffects.DARKNESS,EFFECT_TICKS,0)); msg(p,"VISUAL INTERFERENCE"); return Command.SINGLE_SUCCESS; }))
                 .then(CommandManager.literal("invert").executes(ctx -> { var p=ctx.getSource().getPlayerOrThrow(); invertControls(p); msg(p,"CONTROLS INVERTED"); return Command.SINGLE_SUCCESS; }))
                 .then(CommandManager.literal("drop").executes(ctx -> { var p=ctx.getSource().getPlayerOrThrow(); dropInventory(p); msg(p,"INVENTORY EJECTED"); return Command.SINGLE_SUCCESS; }))
-                .then(CommandManager.literal("stop").executes(ctx -> { stopPhenomena(ctx.getSource().getServer()); ctx.getSource().sendFeedback(()->Text.literal("PHENOMENON: active effects stopped; normal tick rate restored."),false); return Command.SINGLE_SUCCESS; }))));
+                .then(CommandManager.literal("resume").executes(ctx -> { runTickRateCommand(ctx.getSource().getServer(),20); ctx.getSource().getServer().getCommandManager().executeWithPrefix(ctx.getSource().getServer().getCommandSource(),"tick unfreeze"); ctx.getSource().sendFeedback(()->Text.literal("PHENOMENON: world resumed at 20 TPS."),false); return Command.SINGLE_SUCCESS; }))
+                .then(CommandManager.literal("stop").executes(ctx -> { stopPhenomena(ctx.getSource().getServer()); ctx.getSource().sendFeedback(()->Text.literal("PHENOMENON: effects cleared; world frozen (0 effective TPS). Use /phenomenon resume to continue."),false); return Command.SINGLE_SUCCESS; }))));
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> { UUID id=handler.player.getUuid(); gravityTicks.remove(id); tntTrailTicks.remove(id); tntDelay.remove(id); speedsterTicks.remove(id); movementFrames.remove(id); lastPositions.remove(id); handler.player.setNoGravity(false); });
         ServerTickEvents.END_SERVER_TICK.register(PhenomenonMod::tick);
     }
 
     private static void tick(MinecraftServer server) {
         if (--eventCooldown <= 0) { eventCooldown=EVENT_MIN_TICKS+server.getOverworld().random.nextInt(EVENT_RANDOM_EXTRA_TICKS+1); var players=server.getPlayerManager().getPlayerList(); if(!players.isEmpty()){var p=players.get(server.getOverworld().random.nextInt(players.size()));triggerRandom(p.getServerWorld(),p);} }
-        if(tickRateRestoreTicks>0 && --tickRateRestoreTicks==0){runTickRateCommand(server,20);broadcast(server,"PHENOMENON: time returned to normal.");}
+        if(tickRateRestoreAtNanos>0 && System.nanoTime()>=tickRateRestoreAtNanos){runTickRateCommand(server,20);tickRateRestoreAtNanos=0;broadcast(server,"PHENOMENON: time returned to normal.");}
         for(ServerPlayerEntity p:server.getPlayerManager().getPlayerList()){
             UUID id=p.getUuid(); ServerWorld w=p.getServerWorld(); Integer g=gravityTicks.get(id);
             if(g!=null){if(g<=1||p.isDead()||p.isSpectator()){gravityTicks.remove(id);p.setNoGravity(false);p.sendMessage(Text.literal("PHENOMENON: gravity restored."),true);}else{gravityTicks.put(id,g-1);p.setNoGravity(true);Vec3d v=p.getVelocity();p.setVelocity(v.x,Math.min(.75,v.y+.08),v.z);p.velocityModified=true;if(w.getTime()%3==0)w.spawnParticles(ParticleTypes.REVERSE_PORTAL,p.getX(),p.getY()+.7,p.getZ(),3,.25,.4,.25,.02);}}
@@ -73,9 +74,9 @@ public final class PhenomenonMod implements ModInitializer {
     private static void dropInventory(ServerPlayerEntity p){var inventory=p.getInventory();for(int i=0;i<inventory.size();i++){var stack=inventory.getStack(i);if(!stack.isEmpty()){p.dropItem(stack.copy(),true,false);inventory.setStack(i,net.minecraft.item.ItemStack.EMPTY);}}p.currentScreenHandler.sendContentUpdates();}
     private static void startGravity(ServerPlayerEntity p){gravityTicks.put(p.getUuid(),EFFECT_TICKS);p.setNoGravity(true);Vec3d v=p.getVelocity();p.setVelocity(v.x,Math.max(.25,v.y),v.z);p.velocityModified=true;p.getServerWorld().spawnParticles(ParticleTypes.REVERSE_PORTAL,p.getX(),p.getY()+.6,p.getZ(),18,.6,.3,.6,.08);}
     private static void teleportAnomaly(ServerWorld w,ServerPlayerEntity p){double a=w.random.nextDouble()*Math.PI*2,r=5+w.random.nextDouble()*8;p.requestTeleport(p.getX()+Math.cos(a)*r,p.getY()+1,p.getZ()+Math.sin(a)*r);msg(p,"SPATIAL DISPLACEMENT");}
-    private static void setTickRate(MinecraftServer s,int rate){runTickRateCommand(s,rate);tickRateRestoreTicks=160;}
+    private static void setTickRate(MinecraftServer s,int rate){s.getCommandManager().executeWithPrefix(s.getCommandSource(),"tick unfreeze");runTickRateCommand(s,rate);tickRateRestoreAtNanos=System.nanoTime()+PHENOMENON_DURATION_NANOS;}
     private static void runTickRateCommand(MinecraftServer s,int rate){s.getCommandManager().executeWithPrefix(s.getCommandSource(),"tick rate "+rate);}
     private static void msg(ServerPlayerEntity p,String e){p.sendMessage(Text.literal("PHENOMENON: "+e),false);}
     private static void broadcast(MinecraftServer s,String m){for(ServerPlayerEntity p:s.getPlayerManager().getPlayerList())p.sendMessage(Text.literal(m),false);}
-    private static void stopPhenomena(MinecraftServer s){for(ServerPlayerEntity p:s.getPlayerManager().getPlayerList())p.setNoGravity(false);gravityTicks.clear();tntTrailTicks.clear();tntDelay.clear();speedsterTicks.clear();movementFrames.clear();lastPositions.clear();tickRateRestoreTicks=0;runTickRateCommand(s,20);}
+    private static void stopPhenomena(MinecraftServer s){for(ServerPlayerEntity p:s.getPlayerManager().getPlayerList())p.setNoGravity(false);gravityTicks.clear();tntTrailTicks.clear();tntDelay.clear();speedsterTicks.clear();movementFrames.clear();lastPositions.clear();tickRateRestoreAtNanos=0;runTickRateCommand(s,20);s.getCommandManager().executeWithPrefix(s.getCommandSource(),"tick freeze");}
 }
