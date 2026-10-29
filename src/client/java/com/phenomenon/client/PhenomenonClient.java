@@ -5,6 +5,7 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
+import net.minecraft.client.option.Perspective;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.effect.StatusEffects;
@@ -14,7 +15,7 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 
 /**
- * Renders Sandevistan afterimages by drawing the player's own skin/model at
+ * Renders After Image afterimages by drawing the player's own skin/model at
  * several recent positions. History is local-render-only; no fake entities are
  * added to the world or sent to the server.
  */
@@ -46,6 +47,7 @@ public final class PhenomenonClient implements ClientModInitializer {
             MinecraftClient client = MinecraftClient.getInstance();
             AbstractClientPlayerEntity player = client.player;
             if (player == null || client.world == null || context.consumers() == null
+                    || client.options.getPerspective() == Perspective.FIRST_PERSON
                     || !player.hasStatusEffect(StatusEffects.SPEED) || frames.isEmpty()) {
                 return;
             }
