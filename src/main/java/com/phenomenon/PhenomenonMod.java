@@ -21,13 +21,16 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.UUID;\nimport java.util.concurrent.TimeUnit;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 public final class PhenomenonMod implements ModInitializer {
     private static final int EVENT_MIN_TICKS = 600;
     private static final int EVENT_RANDOM_EXTRA_TICKS = 1200;
-    private static final int EFFECT_TICKS = 160;
-    private static final int TRAIL_TICKS = 240;
+    // 60 seconds at the normal 20 TPS; tick-rate anomalies use a wall-clock deadline.
+    private static final int EFFECT_TICKS = 1200;
+    private static final int TRAIL_TICKS = 1200;
+    private static final long PHENOMENON_DURATION_NANOS = TimeUnit.SECONDS.toNanos(60);
     private static final int TNT_NEARBY_CAP = 24;
     private static final int MOVEMENT_FRAMES = 8;
     private static final Map<UUID, Integer> gravityTicks = new HashMap<>();
