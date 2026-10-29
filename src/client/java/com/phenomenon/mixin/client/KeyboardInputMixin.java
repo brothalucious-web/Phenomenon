@@ -11,11 +11,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(KeyboardInput.class)
 public abstract class KeyboardInputMixin extends Input {
-    @Inject(method = "tick", at = @At("TAIL"))
-    private void phenomenon$invertMovement(CallbackInfo ci) {
+    @Inject(method = "tick(ZF)V", at = @At("TAIL"))
+    private void phenomenon$invertMovement(boolean slowDown, float slowDownFactor, CallbackInfo ci) {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player != null && client.player.hasStatusEffect(StatusEffects.HASTE)) {
-            var effect = client.player.getStatusEffect(StatusEffects.SLOWNESS);
+            var effect = client.player.getStatusEffect(StatusEffects.HASTE);
             if (effect != null && effect.getAmplifier() == 10) {
                 this.movementForward = -this.movementForward;
                 this.movementSideways = -this.movementSideways;
