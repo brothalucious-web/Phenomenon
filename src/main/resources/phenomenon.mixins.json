@@ -1,7 +1,11 @@
 {
-  "required": false,
+  "required": true,
   "package": "com.phenomenon.mixin",
+  "refmap": "phenomenon-refmap.json",
   "compatibilityLevel": "JAVA_21",
+  "client": [
+    "client.KeyboardInputMixin"
+  ],
   "injectors": {
     "defaultRequire": 1
   }
